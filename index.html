@@ -1,0 +1,1017 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>The Minimum Wage Story</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #fafafa;
+      color: #1a1a1a;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+    }
+
+    .dashboard {
+      width: 100%;
+      max-width: 1200px;
+      background:
+        url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100' opacity='0.08'%3E%3Cpath d='M25 80 Q25 20 40 20 Q50 20 50 50 Q50 20 60 20 Q75 20 75 80' fill='none' stroke='%23FFC72C' stroke-width='8' stroke-linecap='round'/%3E%3C/svg%3E") center center / 200px no-repeat,
+        linear-gradient(135deg, #DA291C 0%, #bf1e1e 100%);
+      border: 3px solid #FFC72C;
+      border-radius: 12px;
+      padding: 8px 0;
+      display: grid;
+      grid-template-rows: auto 1fr auto;
+      gap: 4px;
+      box-shadow: 0 8px 32px rgba(218, 41, 28, 0.3);
+    }
+
+    /* Top Section - Wage Buttons */
+    .top-section {
+      text-align: center;
+      padding-bottom: 12px;
+    }
+
+    .wage-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 8px;
+    }
+
+    .wage-btn {
+      padding: 12px 24px;
+      font-size: 16px;
+      font-weight: 600;
+      border: 3px solid #ccc;
+      border-radius: 8px;
+      background: #fff;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .wage-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    }
+
+    .wage-btn.active {
+      color: white;
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+    }
+
+    .wage-btn[data-wage="0"] {
+      border-color: #FFC72C;
+      color: #FFC72C;
+    }
+    .wage-btn[data-wage="0"].active {
+      background: #FFC72C;
+      color: #333;
+    }
+
+    .wage-btn[data-wage="1"] {
+      border-color: #e89b00;
+      color: #e89b00;
+    }
+    .wage-btn[data-wage="1"].active {
+      background: #e89b00;
+      color: white;
+    }
+
+    .wage-btn[data-wage="2"] {
+      border-color: #2a7d2a;
+      color: #2a7d2a;
+    }
+    .wage-btn[data-wage="2"].active {
+      background: #2a7d2a;
+      color: white;
+    }
+
+    /* Middle Section - Three Columns */
+    .middle-section {
+      display: grid;
+      grid-template-columns: 0.9fr 1.2fr 0.9fr;
+      gap: 0;
+    }
+
+    /* Center Charts Section */
+    .center-charts {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 8px;
+      padding: 0;
+    }
+
+    .chart-container {
+      border-radius: 8px;
+      padding: 8px;
+      text-align: center;
+    }
+
+    .bigmac-container {
+      text-align: center;
+      padding: 5px;
+    }
+
+    .bigmac-image {
+      width: 210px;
+      height: auto;
+      margin: 0;
+    }
+
+    .bigmac-cost {
+      font-size: 30px;
+      font-weight: 700;
+      color: #FFC72C;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .bigmac-change {
+      font-size: 16px;
+      font-weight: 600;
+      color: #FFC72C;
+    }
+
+    .bigmac-change.no-change {
+      color: #FFC72C;
+      font-size: 14px;
+    }
+
+    .charts-row {
+      display: flex;
+      gap: 4px;
+    }
+
+    .charts-row .chart-container {
+      flex: 1;
+      padding: 5px;
+    }
+
+    .charts-row .chart-svg {
+      height: 140px;
+    }
+
+    .chart-title {
+      font-size: 13px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #FFC72C;
+      margin-bottom: 8px;
+    }
+
+    .chart-svg {
+      width: 100%;
+      height: 150px;
+    }
+
+    /* Smooth transitions for chart elements */
+    #povertyBar, #profitBar2025 {
+      transition: all 0.6s ease-out;
+    }
+
+    #povertyValue, #profitValue {
+      transition: fill 0.3s ease;
+    }
+
+    #profitChange {
+      transition: opacity 0.4s ease;
+    }
+
+    #worker {
+      transition: opacity 0.3s ease;
+    }
+
+    #affordLabelBg, #affordLabelText {
+      transition: all 0.4s ease;
+    }
+
+    .icon-bg {
+      transition: stroke 0.4s ease;
+    }
+
+    #needArrows line {
+      transition: stroke 0.4s ease;
+    }
+
+    .subsidy-text .amount {
+      transition: color 0.3s ease;
+    }
+
+    .fiscal-item {
+      animation: fadeIn 0.4s ease;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Left Panel - Worker Reality */
+    .left-panel {
+      position: relative;
+      padding: 0;
+    }
+
+    .panel-title {
+      text-align: center;
+      font-size: 14px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #FFC72C;
+      margin-bottom: 4px;
+    }
+
+    .visualization {
+      position: relative;
+      width: 100%;
+      height: 360px;
+    }
+
+    .wage-details {
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    .wage-details .calc {
+      font-size: 16px;
+      font-weight: 600;
+      color: #FFC72C;
+      transition: color 0.3s;
+    }
+
+    .wage-details .source {
+      font-size: 12px;
+      color: #FFC72C;
+      margin-top: 4px;
+    }
+
+    .corp-stats {
+      display: flex;
+      justify-content: center;
+      gap: 30px;
+      padding: 8px 0;
+      text-align: center;
+    }
+
+    .corp-stat-item .value {
+      font-size: 16px;
+      font-weight: 600;
+      color: #FFC72C;
+    }
+
+    .corp-stat-item .label {
+      font-size: 12px;
+      color: #FFC72C;
+    }
+
+    .rich-person-img {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 150px;
+      width: 280px;
+      height: auto;
+      object-fit: contain;
+      z-index: 1;
+    }
+
+    .worker-img {
+      position: absolute;
+      left: 50%;
+      transform: translateX(-50%);
+      top: 150px;
+      width: 168px;
+      height: auto;
+      object-fit: contain;
+      z-index: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    .main-svg {
+      width: 100%;
+      height: 100%;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* Right Panel - Corporate Reality */
+    .right-panel {
+      position: relative;
+      padding: 0;
+    }
+
+    /* Bottom Section - Government Subsidy */
+    .bottom-section {
+      text-align: center;
+      padding-top: 2px;
+    }
+
+    .subsidy-container {
+      display: inline-flex;
+      align-items: center;
+      gap: 16px;
+      background: #e8f5e9;
+      padding: 12px 24px;
+      border-radius: 8px;
+      transition: transform 0.6s ease-out;
+    }
+
+    .subsidy-container.shifted {
+      transform: translateX(-80px);
+    }
+
+    .subsidy-icon {
+      width: 84px;
+      height: 84px;
+    }
+
+    .subsidy-text {
+      text-align: left;
+    }
+
+    .subsidy-text .label {
+      font-size: 14px;
+      color: #333;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .subsidy-text .amount {
+      font-size: 40px;
+      font-weight: 700;
+      color: #c44;
+    }
+
+    .subsidy-text .subtext {
+      font-size: 13px;
+      color: #666;
+    }
+
+    .fiscal-impact-container {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 40px;
+      flex-wrap: wrap;
+    }
+
+    .fiscal-item {
+      text-align: center;
+      padding: 8px 16px;
+    }
+
+    .fiscal-item .label {
+      font-size: 14px;
+      color: #FFC72C;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .fiscal-item .amount {
+      font-size: 35px;
+      font-weight: 700;
+      color: #FFC72C;
+    }
+
+    .fiscal-item .amount.positive {
+      color: #FFC72C;
+    }
+
+    .fiscal-item.total .amount {
+      font-size: 40px;
+    }
+
+    .subsidy-text .amount.zero {
+      color: #2a7d2a;
+    }
+
+    /* Thought bubble */
+    .thought-bubble {
+      position: absolute;
+      background: white;
+      border: 2px solid #1a1a1a;
+      border-radius: 16px;
+      padding: 14px 20px;
+      font-size: 14px;
+      line-height: 1.5;
+      opacity: 0;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+      max-width: 280px;
+      text-align: center;
+      pointer-events: none;
+      z-index: 10;
+    }
+
+    .thought-bubble.visible {
+      opacity: 1;
+    }
+
+    .thought-text {
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard">
+    <!-- Top Section - Wage Buttons -->
+    <div class="top-section">
+      <div class="wage-buttons">
+        <button class="wage-btn active" data-wage="0">$14/hr</button>
+        <button class="wage-btn" data-wage="1">$21/hr</button>
+        <button class="wage-btn" data-wage="2">$21/hr + Health</button>
+      </div>
+    </div>
+
+    <!-- Middle Section - Two Columns -->
+    <div class="middle-section">
+      <!-- Left Panel - Worker Reality -->
+      <div class="left-panel">
+        <div class="panel-title">Worker Reality</div>
+        <div class="visualization">
+          <div class="thought-bubble" id="thoughtBubble" style="display:none;">
+            <span class="thought-text" id="thoughtText"></span>
+          </div>
+
+          <svg class="main-svg" viewBox="0 0 500 380" id="mainSvg">
+            <defs>
+              <!-- Arrow marker -->
+              <marker id="arrowhead" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#FFC72C"/>
+              </marker>
+
+            </defs>
+
+            <!-- Icons row at top -->
+            <g id="iconsRow">
+              <!-- Will be populated by JS -->
+            </g>
+
+            <!-- Static arrows from worker to needs -->
+            <g id="needArrows">
+              <line x1="250" y1="165" x2="115" y2="95" stroke="#FFC72C" stroke-width="1.5" marker-end="url(#arrowhead)" stroke-dasharray="4,2"/>
+              <line x1="250" y1="165" x2="205" y2="95" stroke="#FFC72C" stroke-width="1.5" marker-end="url(#arrowhead)" stroke-dasharray="4,2"/>
+              <line x1="250" y1="165" x2="295" y2="95" stroke="#FFC72C" stroke-width="1.5" marker-end="url(#arrowhead)" stroke-dasharray="4,2"/>
+              <line x1="250" y1="165" x2="385" y2="95" stroke="#FFC72C" stroke-width="1.5" marker-end="url(#arrowhead)" stroke-dasharray="4,2"/>
+            </g>
+
+            <!-- "Can't afford" label -->
+            <g id="cantAffordLabel" transform="translate(250, 110)">
+              <rect x="-95" y="7" width="190" height="24" rx="4" id="affordLabelBg" fill="#ffebee" stroke="#c44" stroke-width="1.5"/>
+              <text x="0" y="26" text-anchor="middle" font-size="14" id="affordLabelText" fill="#c44" font-weight="600">Can't afford any of it.</text>
+            </g>
+
+          </svg>
+          <img src="images/sad-mcDonald-worker-with-child.png" alt="Worker" class="worker-img" id="worker"/>
+        </div>
+        <div class="wage-details">
+          <div class="calc" id="wageCalcText">
+            <span id="hourlyCalcSvg">$14/hr</span> × <span id="hoursCalcSvg">38.5</span> hrs/wk = <span id="monthlyCalcSvg">$2,217/mo</span>
+          </div>
+          <div class="source">Source: St. Louis Federal Reserve (Nov 2023)</div>
+        </div>
+      </div>
+
+      <!-- Center Charts Section -->
+      <div class="center-charts">
+        <!-- Big Mac Cost -->
+        <div class="bigmac-container">
+          <div class="chart-title">Cost of a Big Mac</div>
+          <div class="bigmac-cost">
+            <span id="bigmacPrice">$5.79</span>
+            <span class="bigmac-change" id="bigmacChange"></span>
+          </div>
+          <img src="images/bigmac.png" alt="Big Mac" class="bigmac-image" id="bigmacImage"/>
+        </div>
+
+        <!-- Bottom charts row -->
+        <div class="charts-row">
+          <!-- Workers Out of Poverty Chart -->
+          <div class="chart-container">
+            <div class="chart-title">Workers Out of Poverty</div>
+            <svg class="chart-svg" viewBox="0 0 200 120" id="povertyChart">
+              <!-- X-axis (vertical on left) -->
+              <line x1="30" y1="10" x2="30" y2="110" stroke="#FFC72C" stroke-width="1"/>
+              <!-- Y-axis (horizontal in middle - the zero line) -->
+              <line x1="30" y1="60" x2="180" y2="60" stroke="#FFC72C" stroke-width="1"/>
+              <!-- Y-axis labels -->
+              <text x="5" y="20" font-size="8" fill="#FFC72C" id="povertyLabelTop">+1M</text>
+              <text x="5" y="63" font-size="8" fill="#FFC72C">0</text>
+              <text x="5" y="105" font-size="8" fill="#FFC72C" id="povertyLabelBottom">-1M</text>
+              <!-- Bar (negative by default) -->
+              <rect x="80" y="60" width="50" height="38" fill="#FFC72C" opacity="0.8" id="povertyBar"/>
+              <text x="105" y="95" text-anchor="middle" font-size="10" fill="#FFC72C" font-weight="600" id="povertyValue">-750K</text>
+              <text x="105" y="108" text-anchor="middle" font-size="8" fill="#FFC72C">workers</text>
+            </svg>
+          </div>
+
+          <!-- McDonald's Profit Chart -->
+          <div class="chart-container">
+            <div class="chart-title">McDonald's Annual Profit</div>
+            <svg class="chart-svg" viewBox="0 0 200 120" id="profitChart">
+              <!-- Y-axis -->
+              <line x1="30" y1="10" x2="30" y2="100" stroke="#FFC72C" stroke-width="1"/>
+              <!-- X-axis -->
+              <line x1="30" y1="100" x2="180" y2="100" stroke="#FFC72C" stroke-width="1"/>
+              <!-- Y-axis labels -->
+              <text x="5" y="15" font-size="8" fill="#FFC72C">$10B</text>
+              <text x="5" y="55" font-size="8" fill="#FFC72C">$5B</text>
+              <text x="5" y="100" font-size="8" fill="#FFC72C">$0</text>
+              <!-- Profit bars -->
+              <rect x="50" y="35" width="25" height="65" fill="#2a7d2a" opacity="0.7"/>
+              <text x="62" y="112" text-anchor="middle" font-size="7" fill="#FFC72C">2023</text>
+              <rect x="85" y="28" width="25" height="72" fill="#2a7d2a" opacity="0.8"/>
+              <text x="97" y="112" text-anchor="middle" font-size="7" fill="#FFC72C">2024</text>
+              <rect x="120" y="20" width="25" height="80" fill="#2a7d2a" opacity="0.9" id="profitBar2025"/>
+              <text x="132" y="112" text-anchor="middle" font-size="7" fill="#FFC72C">2025</text>
+              <text x="132" y="15" text-anchor="middle" font-size="9" fill="#FFC72C" font-weight="600" id="profitValue">$8.5B</text>
+              <!-- Profit change label (hidden by default) -->
+              <text x="165" y="35" text-anchor="start" font-size="8" fill="#FFC72C" font-weight="600" id="profitChange" opacity="0">-$1.15B</text>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Panel - McDonald's Corporate Info -->
+      <div class="right-panel">
+        <div class="panel-title">Corporate Reality</div>
+        <div class="visualization">
+          <svg class="main-svg" viewBox="0 0 500 380" id="corporateSvg">
+            <defs>
+              <!-- Arrow marker green -->
+              <marker id="arrowheadGreen" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                <polygon points="0 0, 10 3.5, 0 7" fill="#FFC72C"/>
+              </marker>
+            </defs>
+
+            <!-- Luxury icons row at top -->
+            <g id="luxuryIconsRow">
+              <!-- Private Jet -->
+              <g transform="translate(115, 50)">
+                <circle r="45" fill="white" stroke="#2a7d2a" stroke-width="2"/>
+                <svg x="-30" y="-30" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#2a7d2a" stroke-width="1.5">
+                  <path d="M21 16v-2l-8-5V3.5a1.5 1.5 0 00-3 0V9l-8 5v2l8-2.5V19l-2 1.5V22l3.5-1 3.5 1v-1.5L13 19v-5.5l8 2.5z"/>
+                </svg>
+                <text y="-52" text-anchor="middle" font-size="11" fill="#FFC72C">Private Jet</text>
+              </g>
+
+              <!-- Yacht -->
+              <g transform="translate(250, 50)">
+                <circle r="45" fill="white" stroke="#2a7d2a" stroke-width="2"/>
+                <svg x="-30" y="-30" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#2a7d2a" stroke-width="1.5">
+                  <path d="M2 20l2-2h16l2 2"/>
+                  <path d="M4 18l-1-5h18l-1 5"/>
+                  <path d="M12 13V4"/>
+                  <path d="M12 4l6 6H6l6-6"/>
+                </svg>
+                <text y="-52" text-anchor="middle" font-size="11" fill="#FFC72C">Yacht</text>
+              </g>
+
+              <!-- Mansion -->
+              <g transform="translate(385, 50)">
+                <circle r="45" fill="white" stroke="#2a7d2a" stroke-width="2"/>
+                <svg x="-30" y="-30" width="60" height="60" viewBox="0 0 24 24" fill="none" stroke="#2a7d2a" stroke-width="1.5">
+                  <path d="M3 21h18"/>
+                  <path d="M5 21V7l7-4 7 4v14"/>
+                  <path d="M9 21v-6h6v6"/>
+                  <path d="M10 9h4"/>
+                  <path d="M10 12h4"/>
+                </svg>
+                <text y="-52" text-anchor="middle" font-size="11" fill="#FFC72C">Mansion</text>
+              </g>
+            </g>
+
+            <!-- Arrows from rich person to luxuries -->
+            <g id="luxuryArrows">
+              <line x1="250" y1="160" x2="115" y2="95" stroke="#FFC72C" stroke-width="1.5" marker-end="url(#arrowheadGreen)"/>
+              <line x1="250" y1="160" x2="250" y2="95" stroke="#FFC72C" stroke-width="1.5" marker-end="url(#arrowheadGreen)"/>
+              <line x1="250" y1="160" x2="385" y2="95" stroke="#FFC72C" stroke-width="1.5" marker-end="url(#arrowheadGreen)"/>
+            </g>
+
+            <!-- "Can afford it all" label -->
+            <g transform="translate(250, 110)">
+              <rect x="-95" y="2" width="190" height="24" rx="4" fill="#e8f5e9" stroke="#2a7d2a" stroke-width="1.5"/>
+              <text x="0" y="18" text-anchor="middle" font-size="14" fill="#2a7d2a" font-weight="600">Can afford it all.</text>
+            </g>
+
+          </svg>
+          <img src="images/rich-person.png" alt="Rich Person" class="rich-person-img" id="richPerson"/>
+        </div>
+        <div class="corp-stats">
+          <div class="corp-stat-item">
+            <div class="value">$8.5B</div>
+            <div class="label">Net Income</div>
+          </div>
+          <div class="corp-stat-item">
+            <div class="value">$17.8M</div>
+            <div class="label">CEO Pay</div>
+          </div>
+          <div class="corp-stat-item">
+            <div class="value">$150K</div>
+            <div class="label">Per Store Profit</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bottom Section - Government Subsidy -->
+    <div class="bottom-section">
+      <div class="fiscal-impact-container">
+        <div class="subsidy-container">
+          <svg class="subsidy-icon" viewBox="0 0 48 48">
+            <!-- Capitol building icon -->
+            <rect x="8" y="20" width="32" height="22" fill="none" stroke="#1976d2" stroke-width="2"/>
+            <path d="M4 20 L24 6 L44 20" fill="none" stroke="#1976d2" stroke-width="2"/>
+            <circle cx="24" cy="14" r="3" fill="none" stroke="#1976d2" stroke-width="1.5"/>
+            <line x1="14" y1="20" x2="14" y2="42" stroke="#1976d2" stroke-width="2"/>
+            <line x1="24" y1="20" x2="24" y2="42" stroke="#1976d2" stroke-width="2"/>
+            <line x1="34" y1="20" x2="34" y2="42" stroke="#1976d2" stroke-width="2"/>
+            <rect x="4" y="42" width="40" height="4" fill="none" stroke="#1976d2" stroke-width="2"/>
+          </svg>
+          <div class="subsidy-text">
+            <div class="label">Govt Subsidy to McD Workers</div>
+            <div class="amount" id="subsidyAmount">-$2B</div>
+            <div class="subtext">Taxpayer-funded assistance</div>
+          </div>
+        </div>
+
+        <div class="fiscal-item" id="taxRevenueItem" style="display: none;">
+          <div class="label">New Tax Revenue</div>
+          <div class="amount positive">+$1.15B</div>
+        </div>
+
+        <div class="fiscal-item total" id="fiscalImpactItem" style="display: none;">
+          <div class="label">Net Fiscal Benefit</div>
+          <div class="amount positive">+$3.15B</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ============ CONFIGURATION ============
+    const icons = [
+      { id: 'health', image: 'images/health.png', label: 'Health' },
+      { id: 'rent', image: 'images/rent.png', label: 'Rent' },
+      { id: 'utilities', image: 'images/utilities.png', label: 'Utilities' },
+      { id: 'food', image: 'images/Food.png', label: 'Food' },
+    ];
+
+    const iconStartY = 50;
+    const iconSize = 60;
+    const iconSpacing = 90;
+    const startX = 115;
+
+    // Wage buttons functionality
+    const wageButtons = document.querySelectorAll('.wage-btn');
+    const hourlyCalcSvg = document.getElementById('hourlyCalcSvg');
+    const hoursCalcSvg = document.getElementById('hoursCalcSvg');
+    const monthlyCalcSvg = document.getElementById('monthlyCalcSvg');
+    const wageCalcText = document.getElementById('wageCalcText');
+
+    // Dynamic elements
+    const workerImage = document.getElementById('worker');
+    const povertyBar = document.getElementById('povertyBar');
+    const povertyValue = document.getElementById('povertyValue');
+    const profitBar2025 = document.getElementById('profitBar2025');
+    const profitValue = document.getElementById('profitValue');
+    const profitChange = document.getElementById('profitChange');
+    const subsidyAmount = document.getElementById('subsidyAmount');
+    const subsidyContainer = document.querySelector('.subsidy-container');
+    const taxRevenueItem = document.getElementById('taxRevenueItem');
+    const fiscalImpactItem = document.getElementById('fiscalImpactItem');
+    const affordLabelBg = document.getElementById('affordLabelBg');
+    const affordLabelText = document.getElementById('affordLabelText');
+    const needArrows = document.getElementById('needArrows');
+    const bigmacPrice = document.getElementById('bigmacPrice');
+    const bigmacChange = document.getElementById('bigmacChange');
+
+    // Wage options: 0 = $14, 1 = $21, 2 = $21 + Healthcare
+    const wageOptions = [
+      { wage: 14, label: '$14.00', hourly: '$14/hr', color: '#c44', healthcare: false, isLivingWage: false },
+      { wage: 21, label: '$21.00', hourly: '$21/hr', color: '#e89b00', healthcare: false, isLivingWage: true },
+      { wage: 21, label: '$21 + Health', hourly: '$21/hr + Health', color: '#2a7d2a', healthcare: true, isLivingWage: true }
+    ];
+
+    function animateNumber(element, start, end, duration, prefix = '', suffix = '') {
+      const startTime = performance.now();
+      const update = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const current = start + (end - start) * progress;
+        element.textContent = prefix + (current >= 0 ? '' : '-') + '$' + Math.abs(current).toFixed(1) + 'B' + suffix;
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        }
+      };
+      requestAnimationFrame(update);
+    }
+
+    function animateSubsidy(element, start, end, duration, onComplete) {
+      const startTime = performance.now();
+      const easeOutCubic = (t) => 1 - Math.pow(1 - t, 3);
+
+      const update = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easedProgress = easeOutCubic(progress);
+        const current = start + (end - start) * easedProgress;
+
+        if (Math.abs(current) < 0.05) {
+          element.textContent = '$0';
+        } else {
+          element.textContent = '-$' + Math.abs(current).toFixed(1) + 'B';
+        }
+
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        } else if (onComplete) {
+          onComplete();
+        }
+      };
+      requestAnimationFrame(update);
+    }
+
+    function animateBar(element, startY, endY, startHeight, endHeight, duration) {
+      const startTime = performance.now();
+      const update = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeProgress = 1 - Math.pow(1 - progress, 3); // ease-out cubic
+        const currentY = startY + (endY - startY) * easeProgress;
+        const currentHeight = startHeight + (endHeight - startHeight) * easeProgress;
+        element.setAttribute('y', currentY);
+        element.setAttribute('height', currentHeight);
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        }
+      };
+      requestAnimationFrame(update);
+    }
+
+    function animateText(element, startY, endY, duration) {
+      const startTime = performance.now();
+      const update = (currentTime) => {
+        const elapsed = currentTime - startTime;
+        const progress = Math.min(elapsed / duration, 1);
+        const easeProgress = 1 - Math.pow(1 - progress, 3);
+        const currentY = startY + (endY - startY) * easeProgress;
+        element.setAttribute('y', currentY);
+        if (progress < 1) {
+          requestAnimationFrame(update);
+        }
+      };
+      requestAnimationFrame(update);
+    }
+
+    let lastWageIndex = 0;
+    let currentWageIndex = 0;
+
+    function updateWage(index) {
+      currentWageIndex = index;
+      const option = wageOptions[index];
+
+      // Update button states
+      wageButtons.forEach(btn => {
+        btn.classList.remove('active');
+        if (parseInt(btn.dataset.wage) === index) {
+          btn.classList.add('active');
+        }
+      });
+      const hoursPerWeek = option.isLivingWage ? 40 : 38.5;
+      const weeksPerMonth = 4.33;
+      const monthly = option.wage * hoursPerWeek * weeksPerMonth;
+
+      if (option.isLivingWage) {
+        // For $21 and $21+HC, just show the monthly amount
+        wageCalcText.innerHTML = `<span id="monthlyCalcSvg">$${Math.round(monthly).toLocaleString()}/mo${option.healthcare ? ' + Health' : ''}</span>`;
+      } else {
+        // For $14, show full calculation
+        wageCalcText.innerHTML = `<span id="hourlyCalcSvg">${option.hourly}</span> × <span id="hoursCalcSvg">${hoursPerWeek}</span> hrs/wk = <span id="monthlyCalcSvg">$${Math.round(monthly).toLocaleString()}/mo</span>`;
+      }
+
+      // Wage calculation stays golden yellow
+      wageCalcText.style.color = '#FFC72C';
+
+      // Update Big Mac price
+      if (option.healthcare) {
+        bigmacPrice.textContent = '$6.13';
+        bigmacChange.textContent = '↑ +$0.34';
+        bigmacChange.classList.remove('no-change');
+      } else if (option.isLivingWage) {
+        bigmacPrice.textContent = '$5.79';
+        bigmacChange.textContent = 'no change';
+        bigmacChange.classList.add('no-change');
+      } else {
+        bigmacPrice.textContent = '$5.79';
+        bigmacChange.textContent = '';
+        bigmacChange.classList.remove('no-change');
+      }
+
+      // Update worker image and label with fade effect
+      let newImage;
+      if (option.healthcare) {
+        newImage = 'images/happy-mcDonald-worker-with-child.png';
+        workerImage.style.top = '125px';
+      } else if (option.isLivingWage) {
+        newImage = 'images/happy-mcDonald-worker.png';
+        workerImage.style.top = '150px';
+      } else {
+        newImage = 'images/sad-mcDonald-worker-with-child.png';
+        workerImage.style.top = '150px';
+      }
+      if (workerImage.src !== newImage && !workerImage.src.endsWith(newImage)) {
+        workerImage.style.opacity = '0';
+        setTimeout(() => {
+          workerImage.src = newImage;
+          workerImage.style.opacity = '1';
+        }, 300);
+      }
+
+      if (option.isLivingWage) {
+        affordLabelBg.setAttribute('fill', '#e8f5e9');
+        affordLabelBg.setAttribute('stroke', '#2a7d2a');
+        affordLabelText.setAttribute('fill', '#2a7d2a');
+        affordLabelText.textContent = 'Can live with dignity.';
+      } else {
+        affordLabelBg.setAttribute('fill', '#ffebee');
+        affordLabelBg.setAttribute('stroke', '#c44');
+        affordLabelText.setAttribute('fill', '#c44');
+        affordLabelText.textContent = "Can't afford any of it.";
+      }
+
+      // Update icon circles
+      document.querySelectorAll('#iconsRow .icon-bg').forEach(bg => {
+        bg.setAttribute('stroke', option.isLivingWage ? '#2a7d2a' : '#c44');
+      });
+
+      // Update poverty chart with animation
+      const wasLivingWage = lastWageIndex > 0;
+      const animDuration = 600;
+
+      if (option.isLivingWage && !wasLivingWage) {
+        // Animate from negative to positive
+        animateBar(povertyBar, 60, 22, 38, 38, animDuration);
+        animateText(povertyValue, 95, 18, animDuration);
+        setTimeout(() => { povertyValue.textContent = '+750K'; }, animDuration / 2);
+      } else if (!option.isLivingWage && wasLivingWage) {
+        // Animate from positive to negative
+        animateBar(povertyBar, 22, 60, 38, 38, animDuration);
+        animateText(povertyValue, 18, 95, animDuration);
+        setTimeout(() => { povertyValue.textContent = '-750K'; }, animDuration / 2);
+      }
+
+      // Always set poverty chart colors based on current state
+      if (option.isLivingWage) {
+        povertyBar.setAttribute('fill', '#2a7d2a');
+        povertyValue.setAttribute('fill', '#FFC72C');
+      } else {
+        povertyBar.setAttribute('fill', '#FFC72C');
+        povertyValue.setAttribute('fill', '#FFC72C');
+      }
+
+      // Update profit chart with animation
+      const wasHealthcare = lastWageIndex === 2;
+      if (option.isLivingWage && !wasLivingWage) {
+        // Going from $14 to living wage
+        if (option.healthcare) {
+          // $21 + HC: profit drops to $5.35B (-$3.15B)
+          animateBar(profitBar2025, 20, 48, 80, 52, animDuration);
+          setTimeout(() => { profitValue.textContent = '$5.35B'; }, animDuration / 2);
+          profitChange.textContent = '-$3.15B';
+        } else {
+          // $21: profit drops to $7.35B (-$1.15B)
+          animateBar(profitBar2025, 20, 31, 80, 69, animDuration);
+          setTimeout(() => { profitValue.textContent = '$7.35B'; }, animDuration / 2);
+          profitChange.textContent = '-$1.15B';
+        }
+        profitChange.setAttribute('opacity', '1');
+      } else if (option.isLivingWage && wasLivingWage) {
+        // Switching between $21 and $21 + HC
+        if (option.healthcare && !wasHealthcare) {
+          // Going from $21 to $21 + HC
+          animateBar(profitBar2025, 31, 48, 69, 52, animDuration);
+          setTimeout(() => { profitValue.textContent = '$5.35B'; }, animDuration / 2);
+          profitChange.textContent = '-$3.15B';
+        } else if (!option.healthcare && wasHealthcare) {
+          // Going from $21 + HC to $21
+          animateBar(profitBar2025, 48, 31, 52, 69, animDuration);
+          setTimeout(() => { profitValue.textContent = '$7.35B'; }, animDuration / 2);
+          profitChange.textContent = '-$1.15B';
+        }
+      } else if (!option.isLivingWage && wasLivingWage) {
+        // Going back to $14
+        const startY = wasHealthcare ? 48 : 31;
+        const startHeight = wasHealthcare ? 52 : 69;
+        animateBar(profitBar2025, startY, 20, startHeight, 80, animDuration);
+        setTimeout(() => { profitValue.textContent = '$8.5B'; }, animDuration / 2);
+        profitChange.setAttribute('opacity', '0');
+      }
+
+      lastWageIndex = index;
+
+      // Update government subsidy with animation
+      const fiscalAmountEl = fiscalImpactItem.querySelector('.amount');
+      if (option.isLivingWage && !wasLivingWage) {
+        // Animate from -$2B to $0
+        subsidyContainer.classList.add('shifted');
+        animateSubsidy(subsidyAmount, -2, 0, 800, () => {
+          subsidyAmount.classList.add('zero');
+        });
+        // Update fiscal benefit based on healthcare
+        fiscalAmountEl.textContent = option.healthcare ? '+$4.15B' : '+$3.15B';
+        // Show tax revenue with delay
+        setTimeout(() => {
+          taxRevenueItem.style.display = 'block';
+        }, 300);
+        // Show fiscal impact with more delay
+        setTimeout(() => {
+          fiscalImpactItem.style.display = 'block';
+        }, 500);
+      } else if (option.isLivingWage && wasLivingWage) {
+        // Switching between $21 and $21 + HC - update fiscal benefit
+        fiscalAmountEl.textContent = option.healthcare ? '+$4.15B' : '+$3.15B';
+      } else if (!option.isLivingWage && wasLivingWage) {
+        // Animate from $0 back to -$2B
+        subsidyContainer.classList.remove('shifted');
+        subsidyAmount.classList.remove('zero');
+        taxRevenueItem.style.display = 'none';
+        fiscalImpactItem.style.display = 'none';
+        animateSubsidy(subsidyAmount, 0, -2, 800);
+      }
+    }
+
+    wageButtons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        updateWage(parseInt(btn.dataset.wage));
+      });
+    });
+
+    // ============ DOM ELEMENTS ============
+    const mainSvg = document.getElementById('mainSvg');
+    const iconsRow = document.getElementById('iconsRow');
+
+    // ============ INITIALIZATION ============
+    function initializeIcons() {
+      iconsRow.innerHTML = '';
+
+      icons.forEach((item, index) => {
+        const x = startX + index * iconSpacing;
+
+        const group = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+        group.setAttribute('id', `icon-${item.id}`);
+        group.style.transform = `translate(${x}px, ${iconStartY}px)`;
+
+        // Background circle
+        const bg = document.createElementNS('http://www.w3.org/2000/svg', 'circle');
+        bg.setAttribute('r', 45);
+        bg.setAttribute('fill', 'white');
+        bg.setAttribute('stroke', '#c44');
+        bg.setAttribute('stroke-width', '2');
+        bg.setAttribute('class', 'icon-bg');
+        group.appendChild(bg);
+
+        // Icon (using image)
+        const useIcon = document.createElementNS('http://www.w3.org/2000/svg', 'image');
+        useIcon.setAttribute('href', item.image);
+        useIcon.setAttribute('x', -iconSize / 2);
+        useIcon.setAttribute('y', -iconSize / 2);
+        useIcon.setAttribute('width', iconSize);
+        useIcon.setAttribute('height', iconSize);
+        useIcon.setAttribute('class', 'icon-use');
+        group.appendChild(useIcon);
+
+        // Label - ABOVE the icon circle
+        const label = document.createElementNS('http://www.w3.org/2000/svg', 'text');
+        label.setAttribute('y', -52);
+        label.setAttribute('text-anchor', 'middle');
+        label.setAttribute('font-size', '11');
+        label.setAttribute('fill', '#FFC72C');
+        label.textContent = item.label;
+        group.appendChild(label);
+
+        iconsRow.appendChild(group);
+      });
+    }
+
+    // ============ START ============
+    initializeIcons();
+    updateWage(0);
+  </script>
+</body>
+</html>
